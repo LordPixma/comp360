@@ -1,0 +1,46 @@
+name = "c360-jobs"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENV = "dev"
+
+[[queues.consumers]]
+queue = "c360-dev"
+max_batch_size = 10
+max_batch_timeout = 30
+
+[[d1_databases]]
+binding = "DB"
+database_name = "c360-dev"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "R2_EVIDENCE"
+bucket_name = "c360-evidence-dev"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[[durable_objects.bindings]]
+name = "LOCKS"
+class_name = "TenantLock"
+script_name = "c360-locks"
+
+[triggers]
+crons = ["0 */6 * * *"]
+
+[env.staging]
+vars = { ENV = "staging" }
+
+[[env.staging.queues.consumers]]
+queue = "c360-staging"
+
+[env.production]
+vars = { ENV = "prod" }
+
+[[env.production.queues.consumers]]
+queue = "c360-prod"
+max_batch_size = 25
+max_batch_timeout = 60

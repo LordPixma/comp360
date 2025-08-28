@@ -1,0 +1,63 @@
+name = "c360-api"
+main = "dist/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENV = "dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "c360-dev"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "R2_EVIDENCE"
+bucket_name = "c360-evidence-dev"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID"
+
+[[queues.producers]]
+binding = "QUEUE"
+queue = "c360-dev"
+
+[[durable_objects.bindings]]
+name = "LOCKS"
+class_name = "TenantLock"
+script_name = "c360-locks"
+
+[env.staging]
+vars = { ENV = "staging" }
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "c360-staging"
+database_id = "YOUR_STAGING_D1_ID"
+
+[[env.staging.r2_buckets]]
+binding = "R2_EVIDENCE"
+bucket_name = "c360-evidence-staging"
+
+[[env.staging.kv_namespaces]]
+binding = "KV"
+id = "YOUR_STAGING_KV_ID"
+
+[env.production]
+vars = { ENV = "prod" }
+routes = [
+  { pattern = "api.compliance.yourdomain.com", custom_domain = true }
+]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "c360-prod"
+database_id = "YOUR_PROD_D1_ID"
+
+[[env.production.r2_buckets]]
+binding = "R2_EVIDENCE"
+bucket_name = "c360-evidence-prod-us"
+
+[[env.production.kv_namespaces]]
+binding = "KV"
+id = "YOUR_PROD_KV_ID"
