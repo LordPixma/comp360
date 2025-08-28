@@ -8,7 +8,7 @@ ENV = "dev"
 [[d1_databases]]
 binding = "DB"
 database_name = "c360-dev"
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "e5539a46-e857-4677-8ba4-ff5798cc0e25"
 
 [[r2_buckets]]
 binding = "R2_EVIDENCE"
