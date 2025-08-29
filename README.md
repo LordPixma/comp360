@@ -20,7 +20,7 @@ Comp360Flow is a modern, cloud-native compliance management solution designed to
 ### 📊 **Comprehensive Control Management**
 - Centralized control library with pre-built templates
 - Real-time compliance status tracking
-- Evidence collection and management
+- **Evidence collection and management** with secure file upload, download, and deletion APIs
 - Automated risk assessments
 - Control testing and validation workflows
 
