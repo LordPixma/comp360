@@ -1,9 +1,11 @@
-import { SignJWT, jwtVerify, importJWK } from 'jose'
+import { SignJWT, jwtVerify, importJWK, type JWTPayload as JoseJWTPayload } from 'jose'
 import type { JWK } from 'jose'
+import { ForbiddenError } from './errors'
 
 export interface JWTPayload {
   sub: string
-  tenant: string
+  company?: string
+  tenant?: string
   role: 'owner' | 'admin' | 'contributor' | 'auditor'
   exp: number
   iat: number
@@ -47,7 +49,8 @@ export class AuthService {
     if (!this.publicKey) await this.init()
     
     const { payload } = await jwtVerify(token, this.publicKey)
-    return payload as JWTPayload
+    // Align jose JWTPayload to our app JWTPayload by permitting extra fields
+    return payload as unknown as JWTPayload
   }
 }
 
