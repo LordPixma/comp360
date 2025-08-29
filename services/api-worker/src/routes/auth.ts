@@ -78,7 +78,7 @@ authRoutes.get('/oidc/google/callback', async (c) => {
   }
   
   // Get user's tenant and role
-  const membership = await c.env.DB.prepare(
+  let membership = await c.env.DB.prepare(
     'SELECT * FROM memberships WHERE user_id = ? LIMIT 1'
   ).bind(user.id).first()
   
