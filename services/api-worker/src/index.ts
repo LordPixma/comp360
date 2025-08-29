@@ -9,7 +9,8 @@ import { integrationsRoutes } from './routes/integrations'
 import { evidenceRoutes } from './routes/evidence'
 import { tasksRoutes } from './routes/tasks'
 import { auditRoutes } from './routes/audit'
-import adminRoutes from './routes/admin'
+import { risksRoutes } from './routes/risks'
+import integrationsRoutes from './routes/integrations'
 
 export interface Env {
   DB: D1Database
@@ -82,7 +83,8 @@ app.route('/v1/integrations', integrationsRoutes)
 app.route('/v1/evidence', evidenceRoutes)
 app.route('/v1/tasks', tasksRoutes)
 app.route('/v1/audit', auditRoutes)
-app.route('/v1/admin', adminRoutes)
+app.route('/v1/risks', risksRoutes)
+app.route('/v1/integrations', integrationsRoutes)
 
 // Error handler
 app.onError((err, c) => {
