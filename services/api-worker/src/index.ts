@@ -4,6 +4,7 @@ import { jwt } from 'hono/jwt'
 import { logger } from 'hono/logger'
 import { authRoutes } from './routes/auth'
 import { tenantsRoutes } from './routes/tenants'
+import { companiesRoutes } from './routes/companies'
 import { controlsRoutes } from './routes/controls'
 import { integrationsRoutes } from './routes/integrations'
 import { evidenceRoutes } from './routes/evidence'
@@ -77,6 +78,7 @@ app.use('/v1/*', async (c, next) => {
 // Mount route groups
 app.route('/v1/auth', authRoutes)
 app.route('/v1/tenants', tenantsRoutes)
+app.route('/v1/companies', companiesRoutes)
 app.route('/v1/controls', controlsRoutes)
 app.route('/v1/integrations', integrationsRoutes)
 app.route('/v1/evidence', evidenceRoutes)
