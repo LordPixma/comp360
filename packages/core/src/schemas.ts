@@ -50,3 +50,32 @@ export const CreateRiskSchema = z.object({
   owner_user_id: z.string().optional(),
   treatment: z.enum(['accept', 'mitigate', 'transfer', 'avoid']).optional()
 })
+
+// Admin schemas
+export const CreateUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(100),
+  is_global_admin: z.boolean().optional().default(false)
+})
+
+export const UpdateUserSchema = z.object({
+  email: z.string().email().optional(),
+  name: z.string().min(1).max(100).optional(),
+  is_global_admin: z.boolean().optional()
+})
+
+export const CreateCompanySchema = z.object({
+  name: z.string().min(1).max(100),
+  region: z.enum(['EU', 'UK', 'US'])
+})
+
+export const UpdateCompanySchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  region: z.enum(['EU', 'UK', 'US']).optional()
+})
+
+export const CreateAnnouncementSchema = z.object({
+  title: z.string().min(1).max(200),
+  message: z.string().min(1).max(5000),
+  urgent: z.boolean().optional().default(false)
+})
