@@ -80,6 +80,7 @@ app.route('/v1/tenants', tenantsRoutes)
 app.route('/v1/controls', controlsRoutes)
 app.route('/v1/integrations', integrationsRoutes)
 app.route('/v1/evidence', evidenceRoutes)
+app.route('/v1/companies', evidenceRoutes)  // Mount evidence routes under companies for the specific API requirement
 app.route('/v1/tasks', tasksRoutes)
 app.route('/v1/audit', auditRoutes)
 app.route('/v1/admin', adminRoutes)

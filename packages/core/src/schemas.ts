@@ -50,3 +50,14 @@ export const CreateRiskSchema = z.object({
   owner_user_id: z.string().optional(),
   treatment: z.enum(['accept', 'mitigate', 'transfer', 'avoid']).optional()
 })
+
+export const UploadEvidenceSchema = z.object({
+  control_id: z.string().min(1),
+  collector: z.string().min(1),
+  file: z.object({
+    name: z.string().min(1),
+    type: z.string().min(1),
+    size: z.number().positive(),
+    content: z.string() // base64 encoded file content
+  })
+})

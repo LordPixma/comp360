@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify, importJWK } from 'jose'
 import type { JWK } from 'jose'
+import { ForbiddenError } from './errors'
 
 export interface JWTPayload {
   sub: string
