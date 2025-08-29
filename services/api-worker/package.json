@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "hono": "^3.10.0",
-    "@c360/core": "workspace:*",
-    "@c360/shared": "workspace:*",
+  "@c360/core": "file:../../packages/core",
+  "@c360/shared": "file:../../packages/shared",
     "zod": "^3.22.0"
   },
   "devDependencies": {
