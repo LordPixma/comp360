@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { UserSchema } from '@core/schemas'
 import type { Env } from '../index'
 
 export const usersRoutes = new Hono<{ Bindings: Env }>()
@@ -8,6 +9,9 @@ export const usersRoutes = new Hono<{ Bindings: Env }>()
 const UpdateUserProfileSchema = z.object({
   name: z.string().min(1).max(255).optional()
 })
+
+// Type for API response
+type UserProfile = z.infer<typeof UserSchema>
 
 // GET /users/me - Retrieve the profile of the currently authenticated user
 usersRoutes.get('/me', async (c) => {
@@ -20,7 +24,7 @@ usersRoutes.get('/me', async (c) => {
   try {
     // Query the database for the user's profile
     const user = await c.env.DB.prepare(
-      'SELECT id, email, name, created_at FROM users WHERE id = ?'
+      'SELECT id, email, name, created_at, is_global_admin FROM users WHERE id = ?'
     ).bind(userPayload.sub).first()
 
     if (!user) {
@@ -31,7 +35,8 @@ usersRoutes.get('/me', async (c) => {
       id: user.id,
       email: user.email,
       name: user.name,
-      created_at: user.created_at
+      created_at: user.created_at,
+      is_global_admin: Boolean(user.is_global_admin)
     })
   } catch (error) {
     console.error('Error fetching user profile:', error)
@@ -54,7 +59,7 @@ usersRoutes.put('/me', async (c) => {
     // If no fields to update, return current profile
     if (!data.name) {
       const user = await c.env.DB.prepare(
-        'SELECT id, email, name, created_at FROM users WHERE id = ?'
+        'SELECT id, email, name, created_at, is_global_admin FROM users WHERE id = ?'
       ).bind(userPayload.sub).first()
       
       if (!user) {
@@ -65,7 +70,8 @@ usersRoutes.put('/me', async (c) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        created_at: user.created_at
+        created_at: user.created_at,
+        is_global_admin: Boolean(user.is_global_admin)
       })
     }
 
@@ -76,7 +82,7 @@ usersRoutes.put('/me', async (c) => {
 
     // Return updated profile
     const updatedUser = await c.env.DB.prepare(
-      'SELECT id, email, name, created_at FROM users WHERE id = ?'
+      'SELECT id, email, name, created_at, is_global_admin FROM users WHERE id = ?'
     ).bind(userPayload.sub).first()
 
     if (!updatedUser) {
@@ -87,7 +93,8 @@ usersRoutes.put('/me', async (c) => {
       id: updatedUser.id,
       email: updatedUser.email,
       name: updatedUser.name,
-      created_at: updatedUser.created_at
+      created_at: updatedUser.created_at,
+      is_global_admin: Boolean(updatedUser.is_global_admin)
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
