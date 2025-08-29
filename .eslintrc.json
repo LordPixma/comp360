@@ -1,11 +1,10 @@
 {
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:security/recommended"
+  "eslint:recommended",
+  "plugin:@typescript-eslint/recommended"
   ],
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "security"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "no-console": "warn",
     "@typescript-eslint/explicit-module-boundary-types": "off"
