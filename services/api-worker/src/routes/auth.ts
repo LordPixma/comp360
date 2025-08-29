@@ -88,21 +88,21 @@ authRoutes.get('/oidc/google/callback', async (c) => {
     // Create a new tenant for first-time users
     const tenantId = await generateId()
     await c.env.DB.prepare(
-      'INSERT INTO tenants (id, name, region, created_at) VALUES (?, ?, ?, ?)'
+      'INSERT INTO companies (id, name, region, created_at) VALUES (?, ?, ?, ?)'
     ).bind(tenantId, `${payload.name}'s Workspace`, 'US', new Date().toISOString()).run()
     
     await c.env.DB.prepare(
-      'INSERT INTO memberships (tenant_id, user_id, role, added_at) VALUES (?, ?, ?, ?)'
+      'INSERT INTO memberships (company_id, user_id, role, added_at) VALUES (?, ?, ?, ?)'
     ).bind(tenantId, user.id, 'owner', new Date().toISOString()).run()
     
-    membership = { tenant_id: tenantId, role: 'owner' }
+    membership = { company_id: tenantId, role: 'owner' }
   }
   
   // Create JWT
   const authService = new AuthService(c.env)
   const jwt = await authService.createToken({
     sub: user.id,
-    tenant: membership.tenant_id,
+    tenant: membership.company_id,
     role: membership.role
   })
   

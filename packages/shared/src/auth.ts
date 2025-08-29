@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify, importJWK } from 'jose'
+import { generateId } from './crypto'
 import type { JWK } from 'jose'
 
 export interface JWTPayload {
@@ -44,7 +45,6 @@ export class AuthService {
   }
 
   async createRefreshToken(userId: string): Promise<string> {
-    const { generateId } = await import('./crypto')
     const tokenId = await generateId()
     const token = await generateId()
     
