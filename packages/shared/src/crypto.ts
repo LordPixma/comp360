@@ -15,6 +15,93 @@ export async function generateId(): Promise<string> {
     .join('')
 }
 
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16))
+  const encoder = new TextEncoder()
+  const passwordData = encoder.encode(password)
+  
+  // Combine salt and password
+  const combined = new Uint8Array(salt.length + passwordData.length)
+  combined.set(salt)
+  combined.set(passwordData, salt.length)
+  
+  // Hash with PBKDF2
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    combined,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits']
+  )
+  
+  const hashBuffer = await crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    256
+  )
+  
+  // Combine salt and hash for storage
+  const result = new Uint8Array(salt.length + hashBuffer.byteLength)
+  result.set(salt)
+  result.set(new Uint8Array(hashBuffer), salt.length)
+  
+  return btoa(String.fromCharCode(...result))
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  try {
+    const combined = Uint8Array.from(atob(hash), c => c.charCodeAt(0))
+    const salt = combined.slice(0, 16)
+    const storedHash = combined.slice(16)
+    
+    const encoder = new TextEncoder()
+    const passwordData = encoder.encode(password)
+    
+    // Combine salt and password
+    const passwordWithSalt = new Uint8Array(salt.length + passwordData.length)
+    passwordWithSalt.set(salt)
+    passwordWithSalt.set(passwordData, salt.length)
+    
+    // Hash with same parameters
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      passwordWithSalt,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits']
+    )
+    
+    const hashBuffer = await crypto.subtle.deriveBits(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      256
+    )
+    
+    const newHash = new Uint8Array(hashBuffer)
+    
+    // Compare hashes
+    if (newHash.length !== storedHash.length) return false
+    
+    for (let i = 0; i < newHash.length; i++) {
+      if (newHash[i] !== storedHash[i]) return false
+    }
+    
+    return true
+  } catch {
+    return false
+  }
+}
+
 export class EncryptionService {
   private masterKey: CryptoKey | null = null
 

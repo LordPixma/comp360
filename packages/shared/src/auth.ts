@@ -37,10 +37,49 @@ export class AuthService {
     })
       .setProtectedHeader({ alg: 'ES256' })
       .setIssuedAt()
-      .setExpirationTime('7d')
+      .setExpirationTime('15m') // Shorter lived access tokens
       .sign(this.privateKey)
 
     return jwt
+  }
+
+  async createRefreshToken(userId: string): Promise<string> {
+    const { generateId } = await import('./crypto')
+    const tokenId = await generateId()
+    const token = await generateId()
+    
+    // Store refresh token in database with 7 day expiry
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    
+    await this.env.DB.prepare(
+      'INSERT INTO refresh_tokens (id, user_id, token, expires_at, created_at) VALUES (?, ?, ?, ?, ?)'
+    ).bind(tokenId, userId, token, expiresAt, new Date().toISOString()).run()
+    
+    return token
+  }
+
+  async verifyRefreshToken(token: string): Promise<{ userId: string; tokenId: string } | null> {
+    const refreshToken = await this.env.DB.prepare(
+      'SELECT id, user_id FROM refresh_tokens WHERE token = ? AND expires_at > ? AND revoked = FALSE'
+    ).bind(token, new Date().toISOString()).first()
+    
+    if (!refreshToken) {
+      return null
+    }
+    
+    return { userId: refreshToken.user_id, tokenId: refreshToken.id }
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    await this.env.DB.prepare(
+      'UPDATE refresh_tokens SET revoked = TRUE WHERE token = ?'
+    ).bind(token).run()
+  }
+
+  async revokeAllRefreshTokens(userId: string): Promise<void> {
+    await this.env.DB.prepare(
+      'UPDATE refresh_tokens SET revoked = TRUE WHERE user_id = ?'
+    ).bind(userId).run()
   }
 
   async verifyToken(token: string): Promise<JWTPayload> {
