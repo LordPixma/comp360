@@ -31,7 +31,7 @@ async function checkCompanyAccess(c: any, requiredRoles: string[] = []) {
   }
   
   // Check role if specified
-  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+  if (requiredRoles.length > 0 && requiredRoles.indexOf(userRole) === -1) {
     throw new ForbiddenError('Insufficient permissions')
   }
   
