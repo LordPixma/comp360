@@ -1,1 +1,0 @@
-ALTER TABLE users ADD COLUMN is_global_admin BOOLEAN DEFAULT FALSE;
