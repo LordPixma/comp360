@@ -1,4 +1,4 @@
-import { AppError } from './errors'
+import { ForbiddenError } from './errors'
 
 export function enforceCompany<T extends { company_id: string }>(
   jwtCompany: string,
