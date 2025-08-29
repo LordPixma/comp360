@@ -50,3 +50,9 @@ export const CreateRiskSchema = z.object({
   owner_user_id: z.string().optional(),
   treatment: z.enum(['accept', 'mitigate', 'transfer', 'avoid']).optional()
 })
+
+export const CreateUserSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.string().email('Invalid email address.'),
+  is_global_admin: z.boolean().default(false)
+})
