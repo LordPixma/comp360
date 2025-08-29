@@ -1,13 +1,23 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { requireRole } from '@shared/auth'
-import { generateId } from '@shared/crypto'
-import type { Env } from '../index'
 
-export const controlsRoutes = new Hono<{ Bindings: Env }>()
+function requireRole(c: any, allowed: string[]) {
+  const user = (c as any).get?.('user') || (c as any).user
+  if (!user || !allowed.includes(user.role)) {
+    return c.json({ error: { code: 'FORBIDDEN', message: 'Insufficient permissions' } }, 403)
+  }
+}
+
+function generateId(): string {
+  const arr = new Uint8Array(16)
+  crypto.getRandomValues(arr)
+  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+const app = new Hono()
 
 // GET /controls - List controls
-controlsRoutes.get('/', async (c) => {
+app.get('/', async (c) => {
   const pack = c.req.query('pack') || 'soc2_lite'
   
   const controls = await c.env.DB.prepare(
@@ -18,7 +28,7 @@ controlsRoutes.get('/', async (c) => {
 })
 
 // GET /controls/:id - Get control details
-controlsRoutes.get('/:id', async (c) => {
+app.get('/:id', async (c) => {
   const controlId = c.req.param('id')
   const tenant = c.get('tenant')
   
@@ -38,8 +48,9 @@ controlsRoutes.get('/:id', async (c) => {
 })
 
 // POST /controls/:id/status - Update control status
-controlsRoutes.post('/:id/status', async (c) => {
-  requireRole(c, ['owner', 'admin', 'contributor'])
+app.post('/:id/status', async (c) => {
+  const forbidden = requireRole(c, ['owner', 'admin', 'contributor'])
+  if (forbidden) return forbidden
   
   const controlId = c.req.param('id')
   const tenant = c.get('tenant')
@@ -74,7 +85,7 @@ controlsRoutes.post('/:id/status', async (c) => {
   await c.env.DB.prepare(
     'INSERT INTO audit_log (id, tenant_id, actor, action, target, at, meta_json) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).bind(
-    await generateId(),
+  generateId(),
     tenant,
     c.get('user').sub,
     'control.status.update',
@@ -85,3 +96,5 @@ controlsRoutes.post('/:id/status', async (c) => {
   
   return c.json({ success: true })
 })
+
+export default app
