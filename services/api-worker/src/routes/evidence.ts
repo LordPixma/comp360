@@ -1,8 +1,8 @@
 import { Hono } from 'hono'
-import { requireRole } from '@shared/auth'
-import { generateId, sha256 } from '@shared/crypto'
-import { NotFoundError, ValidationError } from '@shared/errors'
-import { UploadEvidenceSchema } from '@c360/core/schemas'
+import { requireRole } from '@c360/shared'
+import { generateId, sha256 } from '@c360/shared'
+import { NotFoundError, ValidationError } from '@c360/shared'
+import { UploadEvidenceSchema } from '@c360/core'
 import type { Env } from '../index'
 
 export const evidenceRoutes = new Hono<{ Bindings: Env }>()
@@ -27,7 +27,7 @@ evidenceRoutes.post('/', async (c) => {
   
   try {
     // Upload file to R2
-    const fileBuffer = Buffer.from(data.file.content, 'base64')
+    const fileBuffer = Uint8Array.from(atob(data.file.content), c => c.charCodeAt(0))
     const fileHash = await sha256(fileBuffer)
     
     await c.env.R2_EVIDENCE.put(storageKey, fileBuffer, {
@@ -184,6 +184,11 @@ evidenceRoutes.delete('/:id', async (c) => {
     ).run()
     
     return c.json({ success: true })
+    
+  } catch (error) {
+    console.error('Evidence deletion failed:', error)
+    throw new ValidationError('Failed to delete evidence')
+  }
 })
 
 // POST /companies/:companyId/evidence - Upload evidence for a specific company 
@@ -209,7 +214,7 @@ evidenceRoutes.post('/:companyId/evidence', async (c) => {
   
   try {
     // Upload file to R2
-    const fileBuffer = Buffer.from(data.file.content, 'base64')
+    const fileBuffer = Uint8Array.from(atob(data.file.content), c => c.charCodeAt(0))
     const fileHash = await sha256(fileBuffer)
     
     await c.env.R2_EVIDENCE.put(storageKey, fileBuffer, {
@@ -265,11 +270,5 @@ evidenceRoutes.post('/:companyId/evidence', async (c) => {
   } catch (error) {
     console.error('Evidence upload failed:', error)
     throw new ValidationError('Failed to upload evidence')
-  }
-})
-    
-  } catch (error) {
-    console.error('Evidence deletion failed:', error)
-    throw new ValidationError('Failed to delete evidence')
   }
 })
