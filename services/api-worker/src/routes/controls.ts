@@ -20,7 +20,7 @@ controlsRoutes.get('/', async (c) => {
 // GET /controls/:id - Get control details
 controlsRoutes.get('/:id', async (c) => {
   const controlId = c.req.param('id')
-  const tenant = c.get('tenant')
+  const companyId = c.get('tenant') // JWT contains company ID in 'tenant' field
   
   const control = await c.env.DB.prepare(
     'SELECT * FROM controls WHERE id = ?'
@@ -31,8 +31,8 @@ controlsRoutes.get('/:id', async (c) => {
   }
   
   const status = await c.env.DB.prepare(
-    'SELECT * FROM control_status WHERE tenant_id = ? AND control_id = ?'
-  ).bind(tenant, controlId).first()
+    'SELECT * FROM control_status WHERE company_id = ? AND control_id = ?'
+  ).bind(companyId, controlId).first()
   
   return c.json({ control, status })
 })
@@ -42,7 +42,7 @@ controlsRoutes.post('/:id/status', async (c) => {
   requireRole(c, ['owner', 'admin', 'contributor'])
   
   const controlId = c.req.param('id')
-  const tenant = c.get('tenant')
+  const companyId = c.get('tenant') // JWT contains company ID in 'tenant' field
   const body = await c.req.json()
   
   const UpdateStatusSchema = z.object({
@@ -54,15 +54,15 @@ controlsRoutes.post('/:id/status', async (c) => {
   const data = UpdateStatusSchema.parse(body)
   
   await c.env.DB.prepare(
-    `INSERT INTO control_status (tenant_id, control_id, status, owner_user_id, next_review_at, updated_at)
+    `INSERT INTO control_status (company_id, control_id, status, owner_user_id, next_review_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?)
-     ON CONFLICT(tenant_id, control_id) DO UPDATE SET
+     ON CONFLICT(company_id, control_id) DO UPDATE SET
        status = excluded.status,
        owner_user_id = excluded.owner_user_id,
        next_review_at = excluded.next_review_at,
        updated_at = excluded.updated_at`
   ).bind(
-    tenant,
+    companyId,
     controlId,
     data.status,
     data.owner_user_id,
@@ -72,10 +72,10 @@ controlsRoutes.post('/:id/status', async (c) => {
   
   // Log to audit
   await c.env.DB.prepare(
-    'INSERT INTO audit_log (id, tenant_id, actor, action, target, at, meta_json) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    'INSERT INTO audit_log (id, company_id, actor, action, target, at, meta_json) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).bind(
     await generateId(),
-    tenant,
+    companyId,
     c.get('user').sub,
     'control.status.update',
     controlId,
