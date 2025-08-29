@@ -11,3 +11,13 @@ dist/
 coverage/
 *.sqlite
 *.sqlite-journal
+
+# Next.js build artifacts
+.next/
+out/
+
+# TypeScript build artifacts
+*.js
+*.js.map
+!next.config.js
+!*.config.js
